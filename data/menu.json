@@ -1,0 +1,667 @@
+{
+  "restaurant": {
+    "name": "Sham Al-Khaleej",
+    "cuisine": "Levantine & Gulf",
+    "currency": "SAR",
+    "halal": true,
+    "spice_scale": "0 = none, 1 = mild, 2 = medium, 3 = hot",
+    "allergen_vocabulary": [
+      "gluten",
+      "dairy",
+      "nuts",
+      "sesame",
+      "eggs",
+      "fish",
+      "shellfish"
+    ]
+  },
+  "items": [
+    {
+      "id": "st-hummus",
+      "name": "Classic Hummus",
+      "name_ar": "حمص",
+      "category": "starters",
+      "price": 8,
+      "description": "Creamy chickpea and tahini dip with olive oil, served with warm pita.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "chickpeas",
+        "tahini",
+        "lemon",
+        "garlic",
+        "olive oil",
+        "pita bread"
+      ],
+      "allergens": [
+        "sesame",
+        "gluten"
+      ],
+      "tags": [
+        "shareable",
+        "light"
+      ],
+      "pairs_well_with": [
+        "mn-mixedgrill",
+        "mn-shawarma"
+      ]
+    },
+    {
+      "id": "st-baba",
+      "name": "Baba Ghanoush",
+      "name_ar": "بابا غنوج",
+      "category": "starters",
+      "price": 20,
+      "description": "Smoky charred eggplant blended with tahini, lemon and pomegranate.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "eggplant",
+        "tahini",
+        "garlic",
+        "lemon",
+        "olive oil",
+        "pomegranate"
+      ],
+      "allergens": [
+        "sesame"
+      ],
+      "tags": [
+        "shareable",
+        "light",
+        "gluten-free"
+      ],
+      "pairs_well_with": [
+        "mn-mixedgrill",
+        "st-fattoush"
+      ]
+    },
+    {
+      "id": "st-muhammara",
+      "name": "Muhammara",
+      "name_ar": "محمرة",
+      "category": "starters",
+      "price": 22,
+      "description": "Roasted red pepper and walnut spread with chili and pomegranate molasses.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 2,
+      "ingredients": [
+        "roasted red pepper",
+        "walnuts",
+        "breadcrumbs",
+        "chili",
+        "pomegranate molasses",
+        "olive oil"
+      ],
+      "allergens": [
+        "nuts",
+        "gluten"
+      ],
+      "tags": [
+        "shareable"
+      ],
+      "pairs_well_with": [
+        "mn-mixedgrill"
+      ]
+    },
+    {
+      "id": "st-falafel",
+      "name": "Falafel Plate",
+      "name_ar": "فلافل",
+      "category": "starters",
+      "price": 24,
+      "description": "Crispy herbed chickpea fritters with tahini sauce and pickled turnip.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 1,
+      "ingredients": [
+        "chickpeas",
+        "parsley",
+        "coriander",
+        "onion",
+        "garlic",
+        "cumin",
+        "sesame seeds",
+        "tahini",
+        "pickled turnip"
+      ],
+      "allergens": [
+        "sesame"
+      ],
+      "tags": [
+        "fried",
+        "high-protein",
+        "gluten-free"
+      ],
+      "pairs_well_with": [
+        "dr-lemonmint",
+        "st-fattoush"
+      ]
+    },
+    {
+      "id": "st-fattoush",
+      "name": "Fattoush Salad",
+      "name_ar": "فتوش",
+      "category": "starters",
+      "price": 26,
+      "description": "Crisp greens, tomato, radish and sumac with toasted pita chips.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "lettuce",
+        "tomato",
+        "cucumber",
+        "radish",
+        "sumac",
+        "pita chips",
+        "olive oil",
+        "pomegranate molasses"
+      ],
+      "allergens": [
+        "gluten"
+      ],
+      "tags": [
+        "light",
+        "salad"
+      ],
+      "pairs_well_with": [
+        "mn-hammour",
+        "mn-mixedgrill"
+      ]
+    },
+    {
+      "id": "st-sambousek",
+      "name": "Cheese Sambousek",
+      "name_ar": "سمبوسة جبن",
+      "category": "starters",
+      "price": 24,
+      "description": "Golden pastry pockets filled with halloumi and mint.",
+      "vegetarian": true,
+      "vegan": false,
+      "spice_level": 0,
+      "ingredients": [
+        "flour",
+        "butter",
+        "halloumi",
+        "mint"
+      ],
+      "allergens": [
+        "gluten",
+        "dairy"
+      ],
+      "tags": [
+        "fried",
+        "shareable"
+      ],
+      "pairs_well_with": [
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "st-gambari",
+      "name": "Garlic Chili Shrimp",
+      "name_ar": "جمبري بالثوم والفلفل",
+      "category": "starters",
+      "price": 38,
+      "description": "Sauteed shrimp in garlic butter with fresh chili and coriander.",
+      "vegetarian": false,
+      "vegan": false,
+      "spice_level": 2,
+      "ingredients": [
+        "shrimp",
+        "garlic",
+        "chili",
+        "butter",
+        "lemon",
+        "coriander"
+      ],
+      "allergens": [
+        "shellfish",
+        "dairy"
+      ],
+      "tags": [
+        "seafood",
+        "gluten-free"
+      ],
+      "pairs_well_with": [
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "mn-shawarma",
+      "name": "Chicken Shawarma Plate",
+      "name_ar": "صحن شاورما دجاج",
+      "category": "mains",
+      "price": 42,
+      "description": "Yogurt-marinated chicken with garlic sauce, pickles, fries and flatbread.",
+      "vegetarian": false,
+      "vegan": false,
+      "spice_level": 1,
+      "ingredients": [
+        "chicken",
+        "yogurt",
+        "garlic sauce",
+        "pickles",
+        "potato fries",
+        "flatbread",
+        "shawarma spices"
+      ],
+      "allergens": [
+        "dairy",
+        "gluten"
+      ],
+      "tags": [
+        "popular",
+        "high-protein"
+      ],
+      "pairs_well_with": [
+        "dr-ayran",
+        "st-fattoush"
+      ]
+    },
+    {
+      "id": "mn-kabsa",
+      "name": "Lamb Kabsa",
+      "name_ar": "كبسة لحم",
+      "category": "mains",
+      "price": 58,
+      "description": "Slow-cooked lamb over spiced basmati rice with raisins and toasted almonds.",
+      "vegetarian": false,
+      "vegan": false,
+      "spice_level": 1,
+      "ingredients": [
+        "lamb",
+        "basmati rice",
+        "tomato",
+        "onion",
+        "cardamom",
+        "cloves",
+        "dried lime",
+        "raisins",
+        "almonds"
+      ],
+      "allergens": [
+        "nuts"
+      ],
+      "tags": [
+        "signature",
+        "high-protein",
+        "hearty"
+      ],
+      "pairs_well_with": [
+        "dr-ayran",
+        "st-fattoush"
+      ]
+    },
+    {
+      "id": "mn-mixedgrill",
+      "name": "Mixed Grill Platter",
+      "name_ar": "مشاوي مشكلة",
+      "category": "mains",
+      "price": 72,
+      "description": "Lamb kofta, chicken tikka and lamb chops with grilled vegetables and rice.",
+      "vegetarian": false,
+      "vegan": false,
+      "spice_level": 2,
+      "ingredients": [
+        "ground lamb",
+        "chicken",
+        "lamb chops",
+        "yogurt",
+        "tomato",
+        "onion",
+        "basmati rice",
+        "spice blend"
+      ],
+      "allergens": [
+        "dairy"
+      ],
+      "tags": [
+        "shareable",
+        "high-protein",
+        "hearty"
+      ],
+      "pairs_well_with": [
+        "st-hummus",
+        "st-fattoush",
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "mn-hammour",
+      "name": "Grilled Hammour",
+      "name_ar": "هامور مشوي",
+      "category": "mains",
+      "price": 64,
+      "description": "Grilled hammour fillet with lemon-garlic marinade, spicy tomato sauce and rice.",
+      "vegetarian": false,
+      "vegan": false,
+      "spice_level": 1,
+      "ingredients": [
+        "hammour fish",
+        "lemon",
+        "garlic",
+        "coriander",
+        "tomato",
+        "chili",
+        "basmati rice"
+      ],
+      "allergens": [
+        "fish"
+      ],
+      "tags": [
+        "seafood",
+        "high-protein",
+        "gluten-free"
+      ],
+      "pairs_well_with": [
+        "st-fattoush",
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "mn-harra",
+      "name": "Chicken Harra",
+      "name_ar": "دجاج حارة",
+      "category": "mains",
+      "price": 44,
+      "description": "Chicken braised in a fiery chili, tomato and garlic sauce, served with rice.",
+      "vegetarian": false,
+      "vegan": false,
+      "spice_level": 3,
+      "ingredients": [
+        "chicken",
+        "chili",
+        "tomato",
+        "garlic",
+        "coriander",
+        "basmati rice"
+      ],
+      "allergens": [],
+      "tags": [
+        "high-protein",
+        "gluten-free",
+        "dairy-free"
+      ],
+      "pairs_well_with": [
+        "dr-ayran",
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "mn-cauliflower",
+      "name": "Tahini Roasted Cauliflower",
+      "name_ar": "قرنبيط مشوي بالطحينة",
+      "category": "mains",
+      "price": 36,
+      "description": "Whole roasted cauliflower with tahini, pomegranate and toasted pine nuts.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "cauliflower",
+        "tahini",
+        "pomegranate",
+        "pine nuts",
+        "lemon",
+        "olive oil"
+      ],
+      "allergens": [
+        "sesame",
+        "nuts"
+      ],
+      "tags": [
+        "light",
+        "gluten-free"
+      ],
+      "pairs_well_with": [
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "mn-maqluba",
+      "name": "Vegetable Maqluba",
+      "name_ar": "مقلوبة خضار",
+      "category": "mains",
+      "price": 34,
+      "description": "Upside-down spiced rice with eggplant, cauliflower, potato and tomato.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 1,
+      "ingredients": [
+        "basmati rice",
+        "eggplant",
+        "cauliflower",
+        "potato",
+        "tomato",
+        "cumin",
+        "cinnamon",
+        "allspice"
+      ],
+      "allergens": [],
+      "tags": [
+        "hearty",
+        "gluten-free",
+        "dairy-free",
+        "nut-free"
+      ],
+      "pairs_well_with": [
+        "dr-ayran",
+        "st-fattoush"
+      ]
+    },
+    {
+      "id": "mn-manakish",
+      "name": "Zaatar & Cheese Manakish",
+      "name_ar": "مناقيش زعتر وجبن",
+      "category": "mains",
+      "price": 28,
+      "description": "Baked flatbread topped with akkawi cheese and zaatar.",
+      "vegetarian": true,
+      "vegan": false,
+      "spice_level": 0,
+      "ingredients": [
+        "wheat dough",
+        "akkawi cheese",
+        "zaatar",
+        "sesame seeds",
+        "olive oil"
+      ],
+      "allergens": [
+        "gluten",
+        "dairy",
+        "sesame"
+      ],
+      "tags": [
+        "light",
+        "shareable"
+      ],
+      "pairs_well_with": [
+        "dr-lemonmint"
+      ]
+    },
+    {
+      "id": "ds-kunafa",
+      "name": "Kunafa Nabulsia",
+      "name_ar": "كنافة نابلسية",
+      "category": "desserts",
+      "price": 30,
+      "description": "Warm shredded pastry over melted cheese, soaked in syrup and topped with pistachios.",
+      "vegetarian": true,
+      "vegan": false,
+      "spice_level": 0,
+      "ingredients": [
+        "semolina pastry",
+        "akkawi cheese",
+        "butter",
+        "sugar syrup",
+        "pistachios",
+        "orange blossom water"
+      ],
+      "allergens": [
+        "gluten",
+        "dairy",
+        "nuts"
+      ],
+      "tags": [
+        "signature",
+        "sweet"
+      ],
+      "pairs_well_with": [
+        "dr-gahwa"
+      ]
+    },
+    {
+      "id": "ds-umali",
+      "name": "Umm Ali",
+      "name_ar": "أم علي",
+      "category": "desserts",
+      "price": 28,
+      "description": "Warm creamy bread pudding with puff pastry, almonds, raisins and coconut.",
+      "vegetarian": true,
+      "vegan": false,
+      "spice_level": 0,
+      "ingredients": [
+        "puff pastry",
+        "milk",
+        "cream",
+        "almonds",
+        "raisins",
+        "coconut",
+        "sugar"
+      ],
+      "allergens": [
+        "gluten",
+        "dairy",
+        "nuts"
+      ],
+      "tags": [
+        "sweet",
+        "warm"
+      ],
+      "pairs_well_with": [
+        "dr-gahwa"
+      ]
+    },
+    {
+      "id": "ds-datepudding",
+      "name": "Date & Tahini Pudding",
+      "name_ar": "بودينغ التمر والطحينة",
+      "category": "desserts",
+      "price": 24,
+      "description": "Dairy-free pudding of dates, tahini and coconut milk with cardamom.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "dates",
+        "tahini",
+        "coconut milk",
+        "cardamom"
+      ],
+      "allergens": [
+        "sesame"
+      ],
+      "tags": [
+        "sweet",
+        "gluten-free",
+        "dairy-free"
+      ],
+      "pairs_well_with": [
+        "dr-gahwa"
+      ]
+    },
+    {
+      "id": "dr-lemonmint",
+      "name": "Fresh Mint Lemonade",
+      "name_ar": "ليمون بالنعناع",
+      "category": "drinks",
+      "price": 16,
+      "description": "Freshly blended lemon and mint, lightly sweetened.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "lemon",
+        "mint",
+        "sugar",
+        "water"
+      ],
+      "allergens": [],
+      "tags": [
+        "refreshing",
+        "cold"
+      ]
+    },
+    {
+      "id": "dr-gahwa",
+      "name": "Saudi Coffee with Dates",
+      "name_ar": "قهوة سعودية مع تمر",
+      "category": "drinks",
+      "price": 14,
+      "description": "Traditional cardamom and saffron coffee served with dates.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "coffee",
+        "cardamom",
+        "saffron",
+        "dates"
+      ],
+      "allergens": [],
+      "tags": [
+        "hot",
+        "traditional",
+        "caffeinated"
+      ]
+    },
+    {
+      "id": "dr-ayran",
+      "name": "Ayran",
+      "name_ar": "عيران",
+      "category": "drinks",
+      "price": 12,
+      "description": "Chilled salted yogurt drink with a hint of mint.",
+      "vegetarian": true,
+      "vegan": false,
+      "spice_level": 0,
+      "ingredients": [
+        "yogurt",
+        "water",
+        "salt",
+        "mint"
+      ],
+      "allergens": [
+        "dairy"
+      ],
+      "tags": [
+        "cold",
+        "refreshing"
+      ]
+    },
+    {
+      "id": "dr-water",
+      "name": "Water",
+      "name_ar": "ماء",
+      "category": "drinks",
+      "price": 1,
+      "description": "water.",
+      "vegetarian": true,
+      "vegan": true,
+      "spice_level": 0,
+      "ingredients": [
+        "water"
+      ],
+      "allergens": [],
+      "tags": [
+        "refreshing",
+        "cold"
+      ]
+    }
+  ]
+}
