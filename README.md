@@ -2,7 +2,7 @@
 
 A conversational agent that helps guests decide what to order from a restaurant menu, learns their preferences through natural conversation, and remembers them across separate conversations. The deep-dive extends memory over time: it learns which dishes a guest likes to eat **together**, and lets those habits fade, be corrected, and stay within the guest's dietary constraints.
 
-- **Live app:** `<DEPLOYED_URL>`
+- **Live app:** `https://sham-al-khaleej-agent.fly.dev`
 - **Source:** `<REPO_URL>`
 - **Test access:** no password. Enter any username (for example `reviewer1`). Using the same username again returns you to the same memory. Different usernames are fully isolated. A ready-made guest with order history exists after running `python -m scripts.seed_demo` locally (username `demo-combo`).
 
