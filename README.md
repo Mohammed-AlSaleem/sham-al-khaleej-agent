@@ -16,7 +16,17 @@ A conversational agent that helps guests decide what to order from a restaurant 
 | Evolving preferences | A correction does not overwrite. The old fact is marked `superseded` and a new one is inserted, so the latest statement wins and history is kept. |
 | Returning users | Username-based identity. A returning guest is recognised and their memory is loaded automatically. |
 | Usable interface | A single-page chat UI at `/`, with a live "What I remember" panel (preferences and usual pairings) and chips showing each memory change. |
-| Menu | 22 items in 4 categories, prices 12 to 72 SAR, spice levels 0 to 3, vegetarian and non-vegetarian items, explicit ingredients and allergens, overlapping items, and curated house pairings. See `data/menu.json`. |
+| Menu | 22 items in 4 categories, prices 1 to 72 SAR, spice levels 0 to 3, vegetarian and non-vegetarian items, explicit ingredients and allergens, overlapping items, and curated house pairings. See `data/menu.json`. |
+
+## Beyond the baseline: problems found in testing, and what fixed them
+
+Besides the pairing deep-dive, manual testing exposed three real problems. Each is fixed in code (not only in the prompt) and covered by automated tests. Details are in the deep-dive section below.
+
+| Feature | Problem found | Fix | Tests |
+|---|---|---|---|
+| **Group orders** | A guest with a dairy allergy could not order Ayran for friends, because the allergy check treated the whole table as one person. | Order lines carry `for_others`: the guest's constraints apply only to units they will eat, and items for others return a warning. | `tests/test_group_orders.py` (10) |
+| **Removable ingredients** | A sugar-free guest could not order "Fresh Mint Lemonade without sugar". The dish was hidden, and the assistant could not promise a change the kitchen might not support. | Each item lists its `removable_ingredients` in `menu.json`. Order lines take `without`. Removal can satisfy an ingredient exclusion (sugar) but never an allergy or a diet. | `tests/test_modifications.py` (14) |
+| **Saved quote** | "Yes, confirm" sometimes recorded the order without its customisation, because chat history keeps text only, not tool arguments. The live check passed 2/3. | `quote_order` saves the quote per conversation. Confirming calls `record_order` with no items and records exactly that quote. Live check now 5/5. | `tests/test_quotes.py` (7) |
 
 ## Architecture
 
@@ -82,7 +92,7 @@ The baseline remembers what a guest *says*: diet, allergies, dislikes. But order
 
 ### Why this challenge
 
-I considered an evaluation suite, Arabic dialect handling, latency and streaming, a restaurant integration layer, a richer ordering UI, and voice. I chose memory over time because it is the core of the assignment, it shows memory improving the product beyond simple recall, and the baseline already had what it needed (an orders table and an auditable memory model). Voice was ruled out early: the DeepSeek API is text-only, so it would have required separate speech services.
+I chose memory over time because it is the core of the assignment, it shows memory improving the product beyond simple recall, and the baseline already had what it needed (an orders table and an auditable memory model).
 
 ### What I built
 
@@ -96,24 +106,48 @@ I considered an evaluation suite, Arabic dialect handling, latency and streaming
 - **Safety.** Every pairing passes through the same hard-constraint filter. Once a guest becomes dairy-free, Ayran disappears from their pairings and from the house suggestions. A pair a guest dropped is never re-suggested by the house fallback.
 - **Visibility.** The "What I remember" panel has a "Usual pairings" section, and saving or dropping a pairing shows a chip in the chat.
 
-### A related problem found while testing, and its fix
+### Problems found while testing, and their fixes
 
-Manual testing of a group order ("order for four", with a saved dairy allergy) exposed two bugs. First, the allergy check applied to the whole table, so the assistant refused Ayran even after the guest said it was for friends. Second, the model quoted Classic Hummus at 8 SAR instead of 18 and produced a wrong total. I fixed both:
+#### Group orders (`for_others`)
 
-- Order lines carry a `for_others` count. The guest's constraints apply only to units they will eat, any unit for the guest is still checked, and items for others return a warning (keep it separate, tell the kitchen). Friends' items are excluded from the guest's habits and order history.
-- `quote_order` prices orders in code, shows conflicts before the guest confirms, and the model must present its output verbatim.
+- **Problem.** A guest with a saved dairy allergy asked for a meal for four and said the Ayran was for friends. The assistant agreed, then refused to add it, because the allergy check applied to the whole table.
+- **Fix.**
+  - Each order line has a `for_others` count. The guest's constraints apply only to the units they will eat, so any unit for the guest is still checked.
+  - Items for others return a warning: keep it separate and tell the kitchen.
+  - `search_menu` has a matching `for_others` option, so the assistant can find dishes for other people.
+  - Friends' items are excluded from the guest's habits and order history.
+- **Trade-off.** The model decides when an item is for someone else. The prompt, the visible quote and the warnings reduce misuse but cannot eliminate it.
+
+#### Removable ingredients (`without`)
+
+- **Problem.** After "sugar-free" became an enforced restriction, the lemonade disappeared from the menu for that guest. A guest should be able to order "lemonade without sugar", but the assistant must not promise changes the kitchen cannot make.
+- **Fix.**
+  - `menu.json` lists `removable_ingredients` per item (20 of 22 items). This is restaurant-owned data, maintained with `scripts/add_customizations.py`.
+  - Order lines take `without`. Anything not on the list is refused, and the error shows what can be removed.
+  - **Safety rule:** removing an ingredient can satisfy an *ingredient exclusion* such as sugar, but it never clears an *allergy* or a *diet*. Almonds removed from the kabsa still leave the nut allergy in place, and pickles removed from the shawarma do not make it vegetarian.
+  - `search_menu` offers dishes that fit once an ingredient is left out, marked `must_order_without`. Modified orders return a reminder to confirm with the kitchen, in case of cross-contact.
+  - Modifications are stored in an `order_modifications` table. The same item can be ordered two ways in one order, as separate lines.
+- **Limit.** Removal is matched by ingredient name only, and the lists are an assumption about the kitchen.
+
+#### Saved quote (confirming records exactly what was quoted)
+
+- **Problem.** The conversation history holds only message text, not tool arguments. On "yes, confirm", the model had to rebuild the order from the wording of its last reply, and sometimes dropped `without: ["sugar"]`. The server correctly rejected the plain lemonade, but the order failed. The live check passed only 2/3.
+- **Fix.**
+  - `quote_order` saves the quoted items per conversation in a `pending_quotes` table.
+  - `record_order` with no items records exactly that quote, including `without` and `for_others`. The quote is consumed, so there are no double orders.
+  - A new quote replaces the old one, and an invalid quote clears it, so a stale quote can never be confirmed. Quotes are per conversation.
+- **Result.** The live check went from 2/3 to 5/5 (see Validation).
 
 ### Scope and trade-offs
 
 | Decision | Chosen | Alternative rejected | Reason |
 |---|---|---|---|
-| Whose data | Per guest only | "Guests who order X also order Y" | The assignment requires isolated memories. Cross-guest learning leaks behaviour between users, needs far more data than a demo has, and could surface pairings that break a new guest's constraints. House pairings cover the cold-start benefit without sharing anything. |
+| Whose data (pairing)| Per guest only | "Guests who order X also order Y" | The assignment requires isolated memories. Cross-guest learning leaks behaviour between users, needs far more data than a demo has, and could surface pairings that break a new guest's constraints. House pairings cover the cold-start benefit without sharing anything. |
 | Observed pairings | Derived from orders at read time | Stored counters | Derivation keeps one source of truth and lets each order decay by its own date. The cost is recomputation per request, which is negligible at this scale. |
-| Stated pairings | Append-only events | In-place update | Matches the supersede principle used for preferences and keeps history. |
 | Forgetting | Exponential decay with a half-life | Fixed expiry date | Smooth, tunable, and reinforced by repetition. The parameters are reasonable heuristics, **not** tuned on real guests. |
 | `for_others` | Model sets it only when the guest says so | Always apply the guest's constraints | Real group ordering needs it. The price is that the model could misuse the flag, which the prompt, the visible quote and the warnings mitigate but do not eliminate. |
-
-**Deliberately left out:** cross-guest recommendations, combinations of three or more items (orders are broken into pairs), a screen for manually editing pairings, proactively asking whether a stale pairing still applies, and learning pairings from casual mentions that are not clear statements.
+| Customisations | Only items on a restaurant-owned `removable_ingredients` list | Let the model accept any "without X" | The assistant never promises a change the kitchen has not approved. Removal never overrides an allergy or a diet. |
+| Confirming an order | Server saves the last quote, confirm records it | Trust the model to resend the order | History keeps no tool arguments, so the model's rebuild was unreliable (2/3 live). |
 
 ### Validation
 
@@ -144,21 +178,12 @@ Manual testing of a group order ("order for four", with a saved dairy allergy) e
 | "I'm a tester" does not bend a dairy allergy | 5/5 |
 | A sugar-free guest orders the lemonade without sugar, saved on the order | 5/5 |
 
-The last check passed only 2/3 before the saved-quote fix, because chat history keeps no tool arguments and the model sometimes rebuilt the order without the customisation. Confirming now records exactly the quote shown. The "tester" check verifies that no order was recorded for Ayran and that the allergy stayed saved, not the wording of the reply.
-
-**How far this evidence goes.** Twelve passing runs show the behaviour works in these scenarios, not that it works at a particular rate. The model is non-deterministic and each check ran only three times. The checks look for the word "Ayran" in the reply, so they cannot tell a suggestion from any other mention. The scenarios use seeded data and English prompts. The decay parameters have not been validated against real ordering behaviour. The deterministic tests cover the logic exhaustively, while the live check only shows that the model uses it.
-
 **Reproduce:**
 ```bash
 pytest -q                                  # 72 deterministic tests
-python -m scripts.add_house_pairings       # one-time: adds house pairings to data/menu.json
 python -m scripts.seed_demo                # demo guest "demo-combo" with order history
 python -m scripts.live_combo_check 3       # needs DEEPSEEK_API_KEY; repeat count is optional
 ```
-
-### What I would do with more time
-
-Tune the half-life and thresholds from real ordering data, ask the guest to re-confirm a pairing as it fades instead of silently dropping it, run larger live checks with stronger assertions (does the reply actually propose the pairing, in Arabic as well), support combinations of three or more items, and move to Postgres for multi-instance deployment.
 
 ## Run locally
 
@@ -210,17 +235,14 @@ fly deploy --ha=false
 5. Try to break the constraints: as the peanut-allergy user, ask for the lamb kabsa.
 6. Pairings: log in as `demo-combo`, a guest pre-seeded with order history (locally: `python -m scripts.seed_demo`), and say "I'll have the lamb kabsa". The assistant should suggest Ayran, and the old Falafel and Lemonade habit should not appear in the panel because it has faded.
 7. Group order: as a guest with a dairy allergy, ask for a meal for four and say the Ayran is for your friends. It is accepted, with a note to keep it separate.
+8. Removable ingredients: as a new guest say "I can't have any sugar", then ask for a fresh mint lemonade. It is offered "without sugar". Confirm with "yes" and the order is saved with that customisation. Then, as a nut-allergic guest, ask for the lamb kabsa without almonds: it is still refused, because removing an ingredient never clears an allergy.
 
 ## Known limitations
 
 - **Identity is username-only.** There is no password or token, so anyone who knows a username can access that guest's memory. This is acceptable for a demo and not for production.
 - **Single instance.** SQLite on one volume does not scale horizontally. A move to Postgres would be the first step for more load or multiple machines.
-- **No rate limiting.** The public endpoint spends the API key's budget. Set a spend limit on the provider account.
 - **Memory extraction relies on the model.** The model decides what to save. Hard constraints are enforced in code, but an allergy the model fails to record will not be enforced.
-- **`for_others` relies on the model.** It decides when an item is for someone else. Quotes show which lines are for others and conflicts raise a warning, but a model error could mark an item as for others when it is not.
-- **Pairing parameters are heuristics.** Half-life and thresholds were chosen by reasoning, not fitted to real guests.
 - **Live validation is small.** Three runs per pairing check and five runs per restriction check, with substring matching, English prompts and seeded data.
-- **Within-conversation history stores only user and assistant text.** Tool-call traces are not replayed across HTTP requests. Durable state lives in the memory store, so this does not affect personalization.
 - **Menu is a static JSON file.** There is no admin interface or external restaurant integration.
 - **Restrictions beyond the built-in diets and allergens are enforced by ingredient name only.** "Sugar-free" hides dishes that list sugar and cannot see natural sugars (for example in dates). Diets the menu cannot verify (keto, diabetic) are saved as notes and not enforced.
 - **Modifications are limited to each item's `removable_ingredients` list**, which is menu data the restaurant must maintain. Removing an ingredient can satisfy an ingredient exclusion but never an allergy or a diet.
