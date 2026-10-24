@@ -183,6 +183,7 @@ I chose memory over time because it is the core of the assignment, it shows memo
 pytest -q                                  # 72 deterministic tests
 python -m scripts.seed_demo                # demo guest "demo-combo" with order history
 python -m scripts.live_combo_check 3       # needs DEEPSEEK_API_KEY; repeat count is optional
+python -m scripts.live_restriction_check 5
 ```
 
 ## Run locally
