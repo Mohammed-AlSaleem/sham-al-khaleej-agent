@@ -1,4 +1,4 @@
--- Long-term memory schema (SQLite; portable to Postgres with minor type changes)
+-- Long-term memory schema (SQLite)
 -- Design principles:
 --   1. Memory is structured facts, not raw chat logs.
 --   2. Facts are never overwritten: a change creates a new row and marks the old
@@ -121,3 +121,25 @@ CREATE TABLE IF NOT EXISTS combo_events (
     CHECK (item_a < item_b)
 );
 CREATE INDEX IF NOT EXISTS idx_combo_user ON combo_events(user_id, item_a, item_b, id);
+
+-- ---------------------------------------------------------------------------
+-- Customisations: ingredients left out of an ordered item ("lemonade without sugar").
+-- One row per removed ingredient per order line; quantity = units prepared that way.
+-- order_items still holds the per-item totals (used for habits and history).
+CREATE TABLE IF NOT EXISTS order_modifications (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id            INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    item_id             TEXT NOT NULL,
+    removed_ingredient  TEXT NOT NULL,
+    quantity            INTEGER NOT NULL DEFAULT 1
+);
+
+-- ---------------------------------------------------------------------------
+-- The order the guest was last quoted in a conversation. Chat history keeps only message text, not tool
+-- arguments, so "yes, confirm" would otherwise force the model to rebuild the order (and any customisations)
+-- from memory. Confirming records exactly what was quoted.
+CREATE TABLE IF NOT EXISTS pending_quotes (
+    conversation_id  TEXT PRIMARY KEY REFERENCES conversations(id) ON DELETE CASCADE,
+    items_json       TEXT NOT NULL,
+    created_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);

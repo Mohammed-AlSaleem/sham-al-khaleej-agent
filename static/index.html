@@ -149,7 +149,7 @@ function renderMemory(prefs, combos) {
     if (p.value) title += ' ' + JSON.stringify(p.value);
     d.textContent = title;
     const s = document.createElement('small');
-    s.textContent = `${p.kind} · ${p.kind === 'diet' || p.kind === 'allergen' ? 'must follow' : p.polarity}${p.strength === 'hard' && p.kind !== 'diet' && p.kind !== 'allergen' ? ' · hard' : ''}`;
+    s.textContent = `${p.kind} · ${p.kind === 'diet' || p.kind === 'allergen' ? 'must follow' : p.kind === 'other' ? 'note' : p.polarity}${p.strength === 'hard' && p.kind !== 'diet' && p.kind !== 'allergen' ? ' · hard' : ''}`;
     d.appendChild(s);
     box.appendChild(d);
   }

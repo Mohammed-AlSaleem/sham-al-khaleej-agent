@@ -152,6 +152,8 @@ def set_preference(user_id: str, kind: str, subject: str, polarity: str, strengt
         polarity, strength = "like", "hard"       # a diet is something the guest follows, always binding
     if kind == "allergen":
         polarity, strength = "avoid", "hard"
+    if kind == "other":
+        strength = "soft"                         # a note: the code cannot enforce it, so never label it hard
     value_json = json.dumps(value, sort_keys=True) if value else None
 
     with db() as c:
@@ -204,6 +206,8 @@ def format_memory_for_prompt(prefs: list[dict]) -> str:
             hard.append(f"{p['kind']}: {p['subject']}" + (f" ({p['polarity']})" if p["kind"] not in ("diet", "allergen") else ""))
         elif p["kind"] in ("spice", "budget"):
             other.append(label)
+        elif p["kind"] == "other":
+            other.append(p["subject"] + (f" ({p['note']})" if p.get("note") else "") + " [note, not enforced]")
         elif p["polarity"] == "like":
             likes.append(f"{p['subject']} ({p['kind']})")
         elif p["polarity"] == "avoid":
@@ -225,7 +229,7 @@ def format_memory_for_prompt(prefs: list[dict]) -> str:
 # ---------------------------------------------------------------- orders
 def record_order(user_id: str, conversation_id: str | None, lines: list[tuple], total: float,
                  created_at: str | None = None) -> int:
-    """lines: (item_id, quantity) or (item_id, quantity, quantity_for_others).
+    """lines: (item_id, quantity[, quantity_for_others[, [removed ingredients]]]).
     created_at is for seeding demo data and tests; normal orders use the current time."""
     with db() as c:
         if created_at:
@@ -237,6 +241,10 @@ def record_order(user_id: str, conversation_id: str | None, lines: list[tuple], 
         oid = cur.lastrowid
         for item_id, qty, *rest in lines:
             others = rest[0] if rest else 0
+            removed = rest[1] if len(rest) > 1 else []
+            for ingredient in removed:
+                c.execute("INSERT INTO order_modifications (order_id, item_id, removed_ingredient, quantity) "
+                          "VALUES (?,?,?,?)", (oid, item_id, ingredient, qty))
             c.execute("INSERT INTO order_items (order_id, item_id, quantity, quantity_for_others) VALUES (?,?,?,?) "
                       "ON CONFLICT(order_id, item_id) DO UPDATE SET quantity = quantity + excluded.quantity, "
                       "quantity_for_others = quantity_for_others + excluded.quantity_for_others",
@@ -304,3 +312,23 @@ def get_combo_state(user_id: str) -> dict[tuple[str, str], dict]:
         if r["stance"] == "drop":
             s["last_drop_ts"] = r["created_at"]
     return state
+
+
+# ---------------------------------------------------------------- pending quote
+def save_pending_quote(conversation_id: str, items: list[dict]) -> None:
+    with db() as c:
+        c.execute("INSERT INTO pending_quotes (conversation_id, items_json) VALUES (?, ?) "
+                  "ON CONFLICT(conversation_id) DO UPDATE SET items_json = excluded.items_json, "
+                  "created_at = datetime('now')", (conversation_id, json.dumps(items)))
+
+
+def get_pending_quote(conversation_id: str) -> list[dict] | None:
+    with db() as c:
+        row = c.execute("SELECT items_json FROM pending_quotes WHERE conversation_id = ?",
+                        (conversation_id,)).fetchone()
+    return json.loads(row["items_json"]) if row else None
+
+
+def clear_pending_quote(conversation_id: str) -> None:
+    with db() as c:
+        c.execute("DELETE FROM pending_quotes WHERE conversation_id = ?", (conversation_id,))

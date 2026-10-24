@@ -16,7 +16,7 @@ A conversational agent that helps guests decide what to order from a restaurant 
 | Evolving preferences | A correction does not overwrite. The old fact is marked `superseded` and a new one is inserted, so the latest statement wins and history is kept. |
 | Returning users | Username-based identity. A returning guest is recognised and their memory is loaded automatically. |
 | Usable interface | A single-page chat UI at `/`, with a live "What I remember" panel (preferences and usual pairings) and chips showing each memory change. |
-| Menu | 21 items in 4 categories, prices 12 to 72 SAR, spice levels 0 to 3, vegetarian and non-vegetarian items, explicit ingredients and allergens, overlapping items, and curated house pairings. See `data/menu.json`. |
+| Menu | 22 items in 4 categories, prices 12 to 72 SAR, spice levels 0 to 3, vegetarian and non-vegetarian items, explicit ingredients and allergens, overlapping items, and curated house pairings. See `data/menu.json`. |
 
 ## Architecture
 
@@ -117,11 +117,14 @@ Manual testing of a group order ("order for four", with a saved dairy allergy) e
 
 ### Validation
 
-**Deterministic tests** (36 in total, no network, free to run):
+**Deterministic tests** (72 in total, no network, free to run):
 
 - `tests/test_combos.py` (15): one shared order is not a habit and two are, old habits decay while recent ones remain, a habit fades and returns when repeated, a stated pairing fades without reinforcement, a drop hides a habit and it only returns after new shared orders, hard constraints override both learned habits and house pairings, new guests get house pairings, a dropped pair is not re-suggested, pairings are per guest, tool validation, the system prompt, and the API payload.
 - `tests/test_group_orders.py` (10): the exact reported scenario (dairy-allergic guest ordering Ayran for friends succeeds with a warning), Ayran for the guest is still rejected, mixed units are checked, `for_others` bounds, friends' items create no habits or history, server-side quotes, and the database migration.
 - `tests/test_core.py` (11): the baseline memory, isolation, constraint and agent-loop tests.
+- `tests/test_restrictions.py` (15): open-ended restrictions ("sugar-free", "no onions") routed to enforceable exclusions, reasons for hidden dishes, and honest notes for things the menu cannot verify (keto).
+- `tests/test_modifications.py` (14): ordering a dish without a listed ingredient, and removal never clearing an allergy or a diet.
+- `tests/test_quotes.py` (7): confirming records exactly the quote shown, including customisations, because chat history keeps no tool arguments.
 
 **Live check against the real model** (`python -m scripts.live_combo_check 3`, DeepSeek `deepseek-flash`, temporary database, three runs per check):
 
@@ -136,7 +139,7 @@ Manual testing of a group order ("order for four", with a saved dairy allergy) e
 
 **Reproduce:**
 ```bash
-pytest -q                                  # 36 deterministic tests
+pytest -q                                  # 72 deterministic tests
 python -m scripts.add_house_pairings       # one-time: adds house pairings to data/menu.json
 python -m scripts.seed_demo                # demo guest "demo-combo" with order history
 python -m scripts.live_combo_check 3       # needs DEEPSEEK_API_KEY; repeat count is optional
@@ -210,6 +213,8 @@ Pushes to `main` also deploy automatically through `.github/workflows/fly-deploy
 - **Live validation is small.** Three runs per check with substring matching, English prompts and seeded data.
 - **Within-conversation history stores only user and assistant text.** Tool-call traces are not replayed across HTTP requests. Durable state lives in the memory store, so this does not affect personalization.
 - **Menu is a static JSON file.** There is no admin interface or external restaurant integration.
+- **Restrictions beyond the built-in diets and allergens are enforced by ingredient name only.** "Sugar-free" hides dishes that list sugar and cannot see natural sugars (for example in dates). Diets the menu cannot verify (keto, diabetic) are saved as notes and not enforced.
+- **Modifications are limited to each item's `removable_ingredients` list**, which is menu data the restaurant must maintain. Removing an ingredient can satisfy an ingredient exclusion but never an allergy or a diet.
 - **Allergen coverage is limited** to the menu's vocabulary (gluten, dairy, nuts, sesame, eggs, fish, shellfish) plus a small alias table. Other allergens are stored as hard ingredient exclusions.
 - **Not medical advice.** The assistant reminds guests to tell the kitchen about allergies, but menu allergen data is only as accurate as the file.
 

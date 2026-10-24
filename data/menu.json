@@ -45,6 +45,10 @@
       "pairs_well_with": [
         "mn-mixedgrill",
         "mn-shawarma"
+      ],
+      "removable_ingredients": [
+        "garlic",
+        "pita bread"
       ]
     },
     {
@@ -76,6 +80,10 @@
       "pairs_well_with": [
         "mn-mixedgrill",
         "st-fattoush"
+      ],
+      "removable_ingredients": [
+        "garlic",
+        "pomegranate"
       ]
     },
     {
@@ -105,6 +113,10 @@
       ],
       "pairs_well_with": [
         "mn-mixedgrill"
+      ],
+      "removable_ingredients": [
+        "chili",
+        "breadcrumbs"
       ]
     },
     {
@@ -139,6 +151,10 @@
       "pairs_well_with": [
         "dr-lemonmint",
         "st-fattoush"
+      ],
+      "removable_ingredients": [
+        "pickled turnip",
+        "tahini"
       ]
     },
     {
@@ -171,6 +187,12 @@
       "pairs_well_with": [
         "mn-hammour",
         "mn-mixedgrill"
+      ],
+      "removable_ingredients": [
+        "radish",
+        "cucumber",
+        "pita chips",
+        "pomegranate molasses"
       ]
     },
     {
@@ -199,6 +221,9 @@
       ],
       "pairs_well_with": [
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "mint"
       ]
     },
     {
@@ -229,6 +254,11 @@
       ],
       "pairs_well_with": [
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "chili",
+        "coriander",
+        "garlic"
       ]
     },
     {
@@ -261,6 +291,12 @@
       "pairs_well_with": [
         "dr-ayran",
         "st-fattoush"
+      ],
+      "removable_ingredients": [
+        "garlic sauce",
+        "pickles",
+        "potato fries",
+        "flatbread"
       ]
     },
     {
@@ -295,6 +331,10 @@
       "pairs_well_with": [
         "dr-ayran",
         "st-fattoush"
+      ],
+      "removable_ingredients": [
+        "raisins",
+        "almonds"
       ]
     },
     {
@@ -329,6 +369,10 @@
         "st-hummus",
         "st-fattoush",
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "onion",
+        "tomato"
       ]
     },
     {
@@ -361,6 +405,10 @@
       "pairs_well_with": [
         "st-fattoush",
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "chili",
+        "coriander"
       ]
     },
     {
@@ -390,6 +438,9 @@
       "pairs_well_with": [
         "dr-ayran",
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "coriander"
       ]
     },
     {
@@ -420,6 +471,10 @@
       ],
       "pairs_well_with": [
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "pine nuts",
+        "pomegranate"
       ]
     },
     {
@@ -452,6 +507,10 @@
       "pairs_well_with": [
         "dr-ayran",
         "st-fattoush"
+      ],
+      "removable_ingredients": [
+        "potato",
+        "cinnamon"
       ]
     },
     {
@@ -482,6 +541,9 @@
       ],
       "pairs_well_with": [
         "dr-lemonmint"
+      ],
+      "removable_ingredients": [
+        "sesame seeds"
       ]
     },
     {
@@ -513,6 +575,10 @@
       ],
       "pairs_well_with": [
         "dr-gahwa"
+      ],
+      "removable_ingredients": [
+        "pistachios",
+        "orange blossom water"
       ]
     },
     {
@@ -545,6 +611,11 @@
       ],
       "pairs_well_with": [
         "dr-gahwa"
+      ],
+      "removable_ingredients": [
+        "almonds",
+        "raisins",
+        "coconut"
       ]
     },
     {
@@ -591,10 +662,13 @@
         "sugar",
         "water"
       ],
-      "allergens": [],
+      "allergens": [ ],
       "tags": [
         "refreshing",
         "cold"
+      ],
+      "removable_ingredients": [
+        "sugar"
       ]
     },
     {
@@ -618,6 +692,9 @@
         "hot",
         "traditional",
         "caffeinated"
+      ],
+      "removable_ingredients": [
+        "dates"
       ]
     },
     {
@@ -642,6 +719,10 @@
       "tags": [
         "cold",
         "refreshing"
+      ],
+      "removable_ingredients": [
+        "mint",
+        "salt"
       ]
     },
     {

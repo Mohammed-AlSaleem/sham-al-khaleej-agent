@@ -82,10 +82,12 @@ def test_vegan_diet_enforced_and_order_rejected_on_conflict():
     assert ok["total_sar"] == 68
 
 
-def test_unknown_allergen_is_rejected_with_guidance():
+def test_unknown_allergen_is_saved_as_hard_ingredient_exclusion():
     ctx = {"user_id": uid(), "memory_events": []}
     res = tools.execute_tool("update_memory", {"op": "set", "kind": "allergen", "subject": "kiwi"}, ctx)
-    assert "error" in res
+    assert "error" not in res
+    assert (res["results"][0]["kind"], res["results"][0]["strength"]) == ("ingredient", "hard")
+    assert "kitchen" in res["note"] and "No menu dish" in res["note"]
 
 
 def test_conflicting_requirements_return_honest_empty_or_small_sets():
