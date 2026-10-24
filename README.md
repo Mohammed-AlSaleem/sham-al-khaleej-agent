@@ -48,7 +48,7 @@ data/menu.json          SQLite (app/schema.sql): users, conversations, messages,
 | `app/combos.py` | Pairing scoring with time decay (pure logic, per guest) |
 | `app/menu.py` | Menu loading, filtering, diet rules, allergen aliases, house pairings |
 | `data/menu.json` | The restaurant menu (single source of truth) |
-| `scripts/` | Development helpers: house-pairing patcher, demo seeder, live model check |
+| `scripts/` | Development helpers: house-pairing and removable-ingredient patchers, demo seeder (`seed_demo [username]`, for example `demo-drop` for the drop demo), live model checks (pairings, restrictions) |
 | `tests/` | Deterministic tests (no network) |
 
 ## Key technical decisions
@@ -135,6 +135,17 @@ Manual testing of a group order ("order for four", with a saved dairy allergy) e
 | Stated pairing is saved (hummus with mixed grill) | 3/3 |
 | Dropped pairing is saved and no longer suggested | 3/3 |
 
+**Live check of open-ended restrictions and customisations** (`python -m scripts.live_restriction_check 5`, DeepSeek `deepseek-flash`, temporary database, five runs per check):
+
+| Check | Result |
+|---|---|
+| "No sugar" is saved in one message, with no permission question | 5/5 |
+| A sugar-free guest is pointed to the one sugar-free dessert | 5/5 |
+| "I'm a tester" does not bend a dairy allergy | 5/5 |
+| A sugar-free guest orders the lemonade without sugar, saved on the order | 5/5 |
+
+The last check passed only 2/3 before the saved-quote fix, because chat history keeps no tool arguments and the model sometimes rebuilt the order without the customisation. Confirming now records exactly the quote shown. The "tester" check verifies that no order was recorded for Ayran and that the allergy stayed saved, not the wording of the reply.
+
 **How far this evidence goes.** Twelve passing runs show the behaviour works in these scenarios, not that it works at a particular rate. The model is non-deterministic and each check ran only three times. The checks look for the word "Ayran" in the reply, so they cannot tell a suggestion from any other mention. The scenarios use seeded data and English prompts. The decay parameters have not been validated against real ordering behaviour. The deterministic tests cover the logic exhaustively, while the live check only shows that the model uses it.
 
 **Reproduce:**
@@ -190,8 +201,6 @@ fly secrets set DEEPSEEK_API_KEY=<your key>
 fly deploy --ha=false
 ```
 
-Pushes to `main` also deploy automatically through `.github/workflows/fly-deploy.yml` (requires the `FLY_API_TOKEN` repository secret).
-
 ## Suggested walkthrough for reviewers
 
 1. Log in as `reviewer1`. Say: "I'm vegetarian, allergic to peanuts, and my budget is about 40 SAR."
@@ -210,7 +219,7 @@ Pushes to `main` also deploy automatically through `.github/workflows/fly-deploy
 - **Memory extraction relies on the model.** The model decides what to save. Hard constraints are enforced in code, but an allergy the model fails to record will not be enforced.
 - **`for_others` relies on the model.** It decides when an item is for someone else. Quotes show which lines are for others and conflicts raise a warning, but a model error could mark an item as for others when it is not.
 - **Pairing parameters are heuristics.** Half-life and thresholds were chosen by reasoning, not fitted to real guests.
-- **Live validation is small.** Three runs per check with substring matching, English prompts and seeded data.
+- **Live validation is small.** Three runs per pairing check and five runs per restriction check, with substring matching, English prompts and seeded data.
 - **Within-conversation history stores only user and assistant text.** Tool-call traces are not replayed across HTTP requests. Durable state lives in the memory store, so this does not affect personalization.
 - **Menu is a static JSON file.** There is no admin interface or external restaurant integration.
 - **Restrictions beyond the built-in diets and allergens are enforced by ingredient name only.** "Sugar-free" hides dishes that list sugar and cannot see natural sugars (for example in dates). Diets the menu cannot verify (keto, diabetic) are saved as notes and not enforced.
@@ -224,8 +233,8 @@ Pushes to `main` also deploy automatically through `.github/workflows/fly-deploy
 restaurant-agent/
   app/            backend (main, agent, tools, memory, combos, menu, config, schema.sql)
   data/menu.json  the menu, including house pairings
-  scripts/        add_house_pairings, seed_demo, live_combo_check
+  scripts/        add_house_pairings, add_customizations, seed_demo (takes an optional username), live_combo_check, live_restriction_check
   static/         chat UI
-  tests/          pytest suite (test_core, test_combos, test_group_orders)
-  Dockerfile  fly.toml  .dockerignore  requirements.txt  .env.example
+  tests/          pytest suite (test_core, test_combos, test_group_orders, test_restrictions, test_modifications, test_quotes)
+  Dockerfile  fly.toml  requirements.txt  .env
 ```

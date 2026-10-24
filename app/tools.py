@@ -1,8 +1,7 @@
 """Tools exposed to the LLM, plus server-side enforcement of hard constraints.
 
-Design note: the model decides *what* to search for, but allergies and diets stored in
-memory are applied here regardless of what the model passes. A forgotten constraint in
-the prompt therefore cannot produce an unsafe recommendation.
+Design note: the model decides *what* to search for, but allergies and diets stored in memory are applied here regardless of what the model passes.
+A forgotten constraint in the prompt therefore cannot produce an unsafe recommendation.
 """
 import copy
 import re
@@ -17,9 +16,8 @@ TOOLS = [
         "function": {
             "name": "search_menu",
             "description": (
-                "Search the restaurant menu. Returns real items with prices, ingredients, allergens and spice "
-                "levels. The guest's stored allergies/diets are applied automatically. Call with no arguments "
-                "to list everything."),
+                "Search the restaurant menu. Returns real items with prices, ingredients, allergens and spice levels."
+                "The guest's stored allergies/diets are applied automatically." "Call with no arguments to list everything."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -55,17 +53,14 @@ TOOLS = [
         "function": {
             "name": "update_memory",
             "description": (
-                "Save, change or remove a durable fact about the guest. Use op='set' for new facts AND for "
-                "corrections (it replaces the previous fact for the same subject); op='remove' when the guest drops "
-                "a preference. Save immediately and tell the guest afterwards: never ask permission first. kinds: "
-                "diet (vegetarian|vegan|pescatarian|gluten-free|dairy-free|halal), allergen (an allergy, e.g. nuts, "
-                "peanuts, shellfish), ingredient (ANY other 'no X' / 'X-free' restriction such as sugar, onion, "
-                "coffee: polarity 'avoid' with strength 'hard' for restrictions, 'soft' for mere dislikes), dish "
-                "(subject = menu item id), category, spice (subject 'tolerance', value {'max_level': 0-3}), budget "
-                "(subject 'max_item_price' or 'max_total', value {'amount': N}), other (a note the menu cannot "
-                "verify, e.g. keto, diabetic, low-carb: stored but NOT enforced). The server also routes 'sugar-free' "
-                "or 'no sugar' style subjects to a hard ingredient exclusion for you. Read the returned note and "
-                "tell the guest what it means."),
+                "Save, change or remove a durable fact about the guest. Use op='set' for new facts AND for corrections (it replaces the previous fact for the same subject); op='remove' when the guest drops a preference."
+                "Save immediately and tell the guest afterwards: never ask permission first. "
+                "kinds: diet (vegetarian|vegan|pescatarian|gluten-free|dairy-free|halal), allergen (an allergy, e.g. nuts, peanuts, shellfish), "
+                "ingredient (ANY other 'no X' / 'X-free' restriction such as sugar, onion, coffee: polarity 'avoid' with strength 'hard' for restrictions, 'soft' for mere dislikes), "
+                "dish (subject = menu item id), category, spice (subject 'tolerance', value {'max_level': 0-3}), "
+                "budget (subject 'max_item_price' or 'max_total', value {'amount': N}), "
+                "other (a note the menu cannot verify, e.g. keto, diabetic, low-carb: stored but NOT enforced). "
+                "The server also routes 'sugar-free' or 'no sugar' style subjects to a hard ingredient exclusion for you. Read the returned note and tell the guest what it means."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -96,54 +91,46 @@ TOOLS = [
                         "item_id": {"type": "string"},
                         "quantity": {"type": "integer", "minimum": 1, "description": "Total units of this item."},
                         "for_others": {"type": "integer", "minimum": 0,
-                                       "description": "How many of those units are for OTHER people, not the guest (0 to quantity). "
-                                                      "Only when the guest says so. Default 0."},
+                                       "description": "How many of those units are for OTHER people, not the guest (0 to quantity). Only when the guest says so. Default 0."},
                         "without": {"type": "array", "items": {"type": "string"},
-                                    "description": "Ingredients to leave out for ALL units on this line. Only those "
-                                                   "listed in the item's removable_ingredients. Use a separate line "
-                                                   "for units prepared differently."}},
+                                    "description": "Ingredients to leave out for ALL units on this line. Only those listed in the item's removable_ingredients. Use a separate line for units prepared differently."}},
                     "required": ["item_id"]}}},
                 "required": ["items"],
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "remember_combo",
+            "description": (
+                "Save or drop a pairing the guest likes to eat together, e.g. hummus with the mixed grill, or Ayran with kabsa. "
+                "Use op='set' when they state or confirm a favourite pairing, op='drop' when they say they are over it or do not want it suggested. "
+                "Needs two different menu item ids (find them with search_menu)."),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "op": {"type": "string", "enum": ["set", "drop"]},
+                    "item_ids": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2},
+                },
+                "required": ["op", "item_ids"],
+            },
+        },
+    }
 ]
 
 
-REMEMBER_COMBO_TOOL = {
-    "type": "function",
-    "function": {
-        "name": "remember_combo",
-        "description": (
-            "Save or drop a pairing the guest likes to eat together, e.g. hummus with the mixed grill, or Ayran with "
-            "kabsa. Use op='set' when they state or confirm a favourite pairing, op='drop' when they say they are "
-            "over it or do not want it suggested. Needs two different menu item ids (find them with search_menu). "
-            "Habits from past orders are learned automatically: do not call this for those."),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "op": {"type": "string", "enum": ["set", "drop"]},
-                "item_ids": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2},
-            },
-            "required": ["op", "item_ids"],
-        },
-    },
-}
-TOOLS.append(REMEMBER_COMBO_TOOL)
-
 _rec = next(t for t in TOOLS if t["function"]["name"] == "record_order")
 _rec["function"]["description"] = (
-    "Save the order ONLY after the guest has confirmed a quote. Normally call it with NO items: it records exactly "
-    "what quote_order last returned in this conversation, including for_others and without. Pass items only to "
-    "record a different order. Units the guest will eat are checked against their hard constraints.")
+    "Save the order ONLY after the guest has confirmed a quote. Normally call it with NO items: it records exactly what quote_order last returned in this conversation, including for_others and without. "
+    "Pass items only to record a different order. Units the guest will eat are checked against their hard constraints.")
 _rec["function"]["parameters"]["required"] = []
 _quote = copy.deepcopy(_rec)
 _quote["function"]["parameters"]["required"] = ["items"]
 _quote["function"]["name"] = "quote_order"
 _quote["function"]["description"] = (
-    "Price an order WITHOUT saving it. Call this before asking the guest to confirm, and show its lines and total "
-    "exactly as returned (never add up prices yourself). Returns problems if an item conflicts with the guest's "
-    "constraints, and warnings for items marked for other people.")
+    "Price an order WITHOUT saving it. Call this before asking the guest to confirm, and show its lines and total exactly as returned (never add up prices yourself). "
+    "Returns problems if an item conflicts with the guest's constraints, and warnings for items marked for other people.")
 TOOLS.append(_quote)
 
 
@@ -396,7 +383,7 @@ def execute_tool(name: str, args: dict, ctx: dict) -> dict:
             else:
                 results.append(memory.set_preference(
                     uid, kind, sub, polarity, strength, args.get("value"), args.get("note"), ctx.get("source_message_id")))
-        if op == "remove" and (kind, subject) != original:        # also clear the literal form the model used
+        if op == "remove" and (kind, subject) != original:    # also clear the literal form the model used
             results.append(memory.remove_preference(uid, *original))
         ctx.setdefault("memory_events", []).extend(results)
         out = {"results": results}
@@ -414,8 +401,7 @@ def execute_tool(name: str, args: dict, ctx: dict) -> dict:
             if fixes:
                 out["can_be_ordered_without"] = fixes
             if not affected:
-                note = ((note or "") + " No menu dish lists this ingredient, so nothing is hidden: tell the guest "
-                        "the menu data cannot verify it.").strip()
+                note = ((note or "") + " No menu dish lists this ingredient, so nothing is hidden: tell the guest the menu data cannot verify it.").strip()
         if note and op != "remove":
             out["note"] = note
         return out
@@ -445,7 +431,7 @@ def execute_tool(name: str, args: dict, ctx: dict) -> dict:
         lines, total, problems, warnings = _build_order({"items": entries}, prefs)
         if problems or not lines:
             if name == "quote_order" and cid:
-                memory.clear_pending_quote(cid)               # never leave a stale quote that could be confirmed
+                memory.clear_pending_quote(cid)             # never leave a stale quote that could be confirmed
             return {"error": "order not " + ("priced" if name == "quote_order" else "recorded"),
                     "problems": problems or ["no items"]}
         result = {"total_sar": total, "lines": lines, "warnings": warnings}

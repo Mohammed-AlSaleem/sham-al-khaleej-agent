@@ -21,12 +21,12 @@ CREATE TABLE IF NOT EXISTS conversations (
     user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     started_at  TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at    TEXT,
-    summary     TEXT                              -- optional short recap, written when the session ends
+    summary     TEXT                 -- optional short recap, written when the session ends
 );
 CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id, started_at);
 
 CREATE TABLE IF NOT EXISTS messages (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    id               INTEGER PRIMARY KEY AUTOINCREMENT, --to generate an integer ID that is higher than any ID previously used
     conversation_id  TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     role             TEXT NOT NULL CHECK (role IN ('user','assistant','tool')),
     content          TEXT NOT NULL,
